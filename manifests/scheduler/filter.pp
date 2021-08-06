@@ -158,7 +158,7 @@ will be removed in a future release. Use the nova::scheduler::periodic_task_inte
     $scheduler_default_filters_real = $::os_service_default
   }
 
-  if is_array($scheduler_available_filters) {
+  if $scheduler_available_filters =~ Array {
     if empty($scheduler_available_filters) {
       $scheduler_available_filters_real = $::os_service_default
     } else {
