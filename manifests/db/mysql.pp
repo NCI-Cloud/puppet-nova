@@ -37,14 +37,14 @@
 #   Defaults to true
 #
 class nova::db::mysql(
-  $password,
-  $dbname        = 'nova',
-  $user          = 'nova',
-  $host          = '127.0.0.1',
-  $charset       = 'utf8',
-  $collate       = 'utf8_general_ci',
-  $allowed_hosts = undef,
-  $setup_cell0   = true,
+  String[1] $password,
+  $dbname                = 'nova',
+  $user                  = 'nova',
+  $host                  = '127.0.0.1',
+  $charset               = 'utf8',
+  $collate               = 'utf8_general_ci',
+  $allowed_hosts         = undef,
+  Boolean $setup_cell0   = true,
 ) {
 
   include nova::deps

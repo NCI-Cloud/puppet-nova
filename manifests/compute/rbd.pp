@@ -90,8 +90,8 @@ class nova::compute::rbd (
   $libvirt_images_rbd_glance_copy_poll_interval = $::os_service_default,
   $libvirt_images_rbd_glance_copy_timeout       = $::os_service_default,
   $rbd_keyring                                  = 'client.nova',
-  $ephemeral_storage                            = true,
-  $manage_ceph_client                           = true,
+  Boolean $ephemeral_storage                    = true,
+  Boolean $manage_ceph_client                   = true,
   $ceph_client_ensure                           = 'present',
 ) {
 

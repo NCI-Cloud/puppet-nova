@@ -16,35 +16,27 @@
 #   Defaults to undef
 #
 class nova::compute::mdev(
-  $mdev_types                          = {},
+  Hash $mdev_types = {},
   # DEPRECATED PARAMETERS
-  $mdev_types_device_addresses_mapping = undef,
+  Hash $mdev_types_device_addresses_mapping = {},
 ) {
   include nova::deps
 
-  validate_legacy(Hash, 'validate_hash', $mdev_types)
-  if $mdev_types_device_addresses_mapping != undef {
-    warning('mdev_types_device_addresses_mapping is deprecated. Use mdev_types.')
-    validate_legacy(Hash, 'validate_hash', $mdev_types_device_addresses_mapping)
-  }
-
-  $dev_addr_mapping_real = pick_default($mdev_types_device_addresses_mapping, {})
-
-  if !empty($dev_addr_mapping_real) {
-    nova_config {
-      'devices/enabled_mdev_types': value => join(keys($dev_addr_mapping_real), ',');
-    }
-
-    $dev_addr_mapping_real.each |$mdev_type, $device_addresses| {
-      nova::compute::mdev_type { $mdev_type :
-        device_addresses => $device_addresses;
-      }
-    }
-  } elsif !empty($mdev_types) {
+  if !empty($mdev_types) {
     nova_config {
       'devices/enabled_mdev_types': value => join(keys($mdev_types), ',')
     }
     create_resources('nova::compute::mdev_type', $mdev_types)
+  elsif !empty($mdev_types_device_addresses_mapping) {
+    nova_config {
+      'devices/enabled_mdev_types': value => join(keys($mdev_types_device_addresses_mapping), ',');
+    }
+
+    $mdev_types_device_addresses_mapping.each |$mdev_type, $device_addresses| {
+      nova::compute::mdev_type { $mdev_type :
+        device_addresses => $device_addresses;
+      }
+    }
   } else {
     nova_config {
       'devices/enabled_mdev_types': ensure => absent;

@@ -133,38 +133,32 @@
 #   Defaults to undef
 #
 class nova::migration::libvirt(
-  $manage_service                      = true,
-  $transport                           = undef,
-  $auth                                = 'none',
-  $listen_address                      = $::os_service_default,
-  $live_migration_inbound_addr         = $::os_service_default,
-  $live_migration_tunnelled            = $::os_service_default,
-  $live_migration_with_native_tls      = $::os_service_default,
-  $live_migration_completion_timeout   = $::os_service_default,
-  $live_migration_timeout_action       = $::os_service_default,
-  $live_migration_permit_post_copy     = $::os_service_default,
-  $live_migration_permit_auto_converge = $::os_service_default,
-  $override_uuid                       = false,
+  Boolean $manage_service              = true,
+  Enum['tcp', 'tls', 'ssh'] $transport = 'tcp',
+  Enum['sasl', 'none'] $auth           = 'none',
+  $listen_address                      = $facts['os_service_default'],
+  $live_migration_inbound_addr         = $facts['os_service_default'],
+  $live_migration_tunnelled            = $facts['os_service_default'],
+  $live_migration_with_native_tls      = $facts['os_service_default'],
+  $live_migration_completion_timeout   = $facts['os_service_default'],
+  $live_migration_timeout_action       = $facts['os_service_default'],
+  $live_migration_permit_post_copy     = $facts['os_service_default'],
+  $live_migration_permit_auto_converge = $facts['os_service_default'],
+  Boolean $override_uuid               = false,
   $host_uuid                           = undef,
-  $configure_libvirt                   = true,
-  $configure_nova                      = true,
+  Boolean $configure_libvirt           = true,
+  Boolean $configure_nova              = true,
   $client_user                         = undef,
   $client_port                         = undef,
   $client_extraparams                  = {},
   $ca_file                             = $::os_service_default,
   $crl_file                            = $::os_service_default,
   $libvirt_version                     = $::nova::compute::libvirt::version::default,
-  $modular_libvirt                     = undef,
+  Optional[Boolean] $modular_libvirt   = undef,
 ) inherits nova::compute::libvirt::version {
 
   include nova::deps
   include nova::params
-
-  if $transport {
-    $transport_real = $transport
-  } else {
-    $transport_real = 'tcp'
-  }
 
   $modular_libvirt_real = pick($modular_libvirt, $::nova::params::modular_libvirt)
 
@@ -172,24 +166,8 @@ class nova::migration::libvirt(
     fail('Modular libvirt daemons are not support in this distribution')
   }
 
-  validate_legacy(Enum['tcp', 'tls', 'ssh'], 'validate_re', $transport_real,
-    [['^tcp$', '^tls$', '^ssh$'], 'Valid options for transport are tcp, tls, ssh.'])
-  validate_legacy(Enum['sasl', 'none'], 'validate_re', $auth,
-    [['^sasl$', '^none$'], 'Valid options for auth are none and sasl.'])
-
-  if $transport_real == 'tls' {
-    $listen_tls = '1'
-    $listen_tcp = '0'
-  } elsif $transport_real == 'tcp' {
-    $listen_tls = '0'
-    $listen_tcp = '1'
-  } else {
-    $listen_tls = '0'
-    $listen_tcp = '0'
-  }
-
   if $configure_nova {
-    if $transport_real == 'ssh' {
+    if $transport == 'ssh' {
       if $client_user {
         $prefix =  "${client_user}@"
       } else {
@@ -213,7 +191,7 @@ class nova::migration::libvirt(
       $extra_params =''
     }
 
-    $live_migration_uri = "qemu+${transport_real}://${prefix}%s${postfix}/system${extra_params}"
+    $live_migration_uri = "qemu+${transport}://${prefix}%s${postfix}/system${extra_params}"
 
     nova_config {
       'libvirt/live_migration_uri':                  value => $live_migration_uri;
@@ -268,20 +246,13 @@ class nova::migration::libvirt(
       }
     }
 
-    if $transport_real == 'tls' {
+    if $transport == 'tls' {
       $auth_tls_real = $auth
-      $auth_tcp_real = $::os_service_default
-      $ca_file_real  = pick($ca_file, $::os_service_default)
-      $crl_file_real = pick($crl_file, $::os_service_default)
-
-      if $ca_file == undef {
-        warning('Usage of undef for the ca_file parameter has been deprecated')
-      }
-      if $crl_file == undef {
-        warning('Usage of undef for the crl_file parameter has been deprecated')
-      }
-    } elsif $transport_real == 'tcp' {
-      $auth_tls_real = $::os_service_default
+      $auth_tcp_real = $facts['os_service_default']
+      $ca_file_real  = $ca_file
+      $crl_file_real = $crl_file
+    } elsif $transport == 'tcp' {
+      $auth_tls_real = $facts['os_service_default']
       $auth_tcp_real = $auth
       $ca_file_real  = $::os_service_default
       $crl_file_real = $::os_service_default
@@ -311,7 +282,7 @@ class nova::migration::libvirt(
       'listen_addr' => { 'value' => pick($listen_address, $::os_service_default), 'quote' => true }
     })
 
-    if $transport_real == 'tls' or $transport_real == 'tcp' {
+    if $transport == 'tls' or $transport == 'tcp' {
       if versioncmp($libvirt_version, '5.6') < 0 {
         fail('libvirt verson < 5.6 is no longer supported')
       }
@@ -321,8 +292,18 @@ class nova::migration::libvirt(
           true    => 'virtproxyd',
           default => 'libvirtd',
         }
-        # libvirtd.service should be stopped before socket service is started.
-        # Otherwise, socket service fails to start.
+        $socket_name = "${proxy_service}-${transport}"
+
+        # This is the dummy resource to trigger exec to stop libvirtd.service.
+        # libvirtd.service should be stopped before socket is started.
+        # Otherwise, socket fails to start.
+        exec { "check ${socket_name}.socket":
+          command => '/usr/bin/true',
+          path    => ['/sbin', '/usr/sbin', '/bin', '/usr/bin'],
+          unless  => "systemctl -q is-active ${socket_name}.socket",
+          require => Anchor['nova::config::end']
+        }
+
         exec { "stop ${proxy_service}.service":
           path    => ['/sbin', '/usr/sbin', '/bin', '/usr/bin'],
           command => "systemctl -q stop ${proxy_service}.service",
@@ -337,9 +318,9 @@ class nova::migration::libvirt(
         }
 
         if $modular_libvirt {
-          Service["${proxy_service}-${transport_real}"] -> Service<| title == 'virtproxyd' |>
+          Service["${proxy_service}-${transport}"] -> Service<| title == 'virtproxyd' |>
         } else {
-          Service["${proxy_service}-${transport_real}"] -> Service<| title == 'libvirt' |>
+          Service["${proxy_service}-${transport}"] -> Service<| title == 'libvirt' |>
         }
       }
     }

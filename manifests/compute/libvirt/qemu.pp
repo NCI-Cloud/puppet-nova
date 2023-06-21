@@ -47,16 +47,16 @@
 #   Defaults to ::nova::compute::libvirt::version::default
 #
 class nova::compute::libvirt::qemu(
-  $configure_qemu     = false,
-  $group              = undef,
-  $max_files          = 1024,
-  $max_processes      = 4096,
-  $vnc_tls            = false,
-  $vnc_tls_verify     = true,
-  $default_tls_verify = true,
-  $memory_backing_dir = undef,
-  $nbd_tls            = false,
-  $libvirt_version    = $::nova::compute::libvirt::version::default,
+  Boolean $configure_qemu     = false,
+  $group                      = undef,
+  $max_files                  = 1024,
+  $max_processes              = 4096,
+  Boolean $vnc_tls            = false,
+  Boolean $vnc_tls_verify     = true,
+  Boolean $default_tls_verify = true,
+  $memory_backing_dir         = undef,
+  Boolean $nbd_tls            = false,
+  $libvirt_version            = $::nova::compute::libvirt::version::default,
 ) inherits nova::compute::libvirt::version {
 
   include nova::deps

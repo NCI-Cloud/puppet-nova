@@ -17,9 +17,9 @@
 #   Defaults to 49215.
 #
 class nova::migration::qemu(
-  $configure_qemu     = false,
-  $migration_port_min = 49152,
-  $migration_port_max = 49215,
+  Boolean $configure_qemu = false,
+  $migration_port_min     = $facts['os_service_default'],
+  $migration_port_max     = $facts['os_service_default'],
 ){
 
   include nova::deps

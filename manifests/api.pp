@@ -191,8 +191,8 @@
 #   Defaults to undef
 #
 class nova::api(
-  $enabled                                     = true,
-  $manage_service                              = true,
+  Boolean $enabled                             = true,
+  Boolean $manage_service                      = true,
   $api_paste_config                            = 'api-paste.ini',
   $ensure_package                              = 'present',
   $api_bind_address                            = '0.0.0.0',
@@ -201,12 +201,12 @@ class nova::api(
   $metadata_listen_port                        = 8775,
   $enabled_apis                                = ['osapi_compute', 'metadata'],
   $use_forwarded_for                           = false,
-  $osapi_compute_workers                       = $::os_workers,
-  $metadata_workers                            = $::os_workers,
-  $sync_db                                     = true,
-  $sync_db_api                                 = true,
-  $db_online_data_migrations                   = false,
   $instance_name_template                      = $::os_service_default,
+  $osapi_compute_workers                       = $facts['os_workers'],
+  $metadata_workers                            = $facts['os_workers'],
+  Boolean $sync_db                             = true,
+  Boolean $sync_db_api                         = true,
+  Boolean $db_online_data_migrations           = false,
   $service_name                                = $::nova::params::api_service_name,
   $metadata_service_name                       = $::nova::params::api_metadata_service_name,
   $enable_proxy_headers_parsing                = $::os_service_default,
@@ -225,12 +225,8 @@ class nova::api(
   $instance_list_cells_batch_fixed_size        = $::os_service_default,
   $list_records_by_skipping_down_cells         = $::os_service_default,
   # DEPRECATED PARAMETER
-  $nova_metadata_wsgi_enabled                  = false,
-  $install_cinder_client                       = undef,
-  $ratelimits                                  = undef,
-  $ratelimits_factory                          = undef,
-  $validate                                    = undef,
-  $validation_options                          = undef,
+  Boolean $nova_metadata_wsgi_enabled          = false,
+  $use_forwarded_for                           = undef,
 ) inherits nova::params {
 
   include nova::deps
@@ -242,21 +238,6 @@ class nova::api(
 
   if !$nova_metadata_wsgi_enabled {
     warning('Running nova metadata api via evenlet is deprecated and will be removed in Stein release.')
-  }
-
-  if $install_cinder_client != undef {
-    warning('The nova::api::install_cinder_client parameter is deprecated and has no effect')
-  }
-
-  if $ratelimits != undef {
-    warning('The nova::api::ratelimits parameter has been deprecated and has no effect')
-  }
-
-  if $validate != undef {
-    warning('The nova::api::validate parameter has been deprecated and has no effect')
-  }
-  if $validation_options != undef {
-    warning('The nova::api::validation_options parameter has been deprecated and has no effect')
   }
 
   if $instance_name_template {

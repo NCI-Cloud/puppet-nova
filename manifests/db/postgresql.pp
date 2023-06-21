@@ -30,12 +30,12 @@
 #   Defaults to true
 #
 class nova::db::postgresql(
-  $password,
-  $dbname      = 'nova',
-  $user        = 'nova',
-  $encoding    = undef,
-  $privileges  = 'ALL',
-  $setup_cell0 = true,
+  String[1] $password,
+  $dbname              = 'nova',
+  $user                = 'nova',
+  $encoding            = undef,
+  $privileges          = 'ALL',
+  Boolean $setup_cell0 = true,
 ) {
 
   include nova::deps

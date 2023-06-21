@@ -289,44 +289,44 @@
 #   Defaults to undef
 #
 class nova::compute (
-  $enabled                                     = true,
-  $manage_service                              = true,
+  Boolean $enabled                             = true,
+  Boolean $manage_service                      = true,
   $ensure_package                              = 'present',
-  $vnc_enabled                                 = true,
-  $spice_enabled                               = false,
+  Boolean $vnc_enabled                         = true,
+  Boolean $spice_enabled                       = false,
   $vncserver_proxyclient_address               = '127.0.0.1',
   $vncproxy_host                               = false,
   $vncproxy_protocol                           = 'http',
   $vncproxy_port                               = '6080',
   $vncproxy_path                               = '/vnc_auto.html',
-  $force_config_drive                          = false,
-  $virtio_nic                                  = false,
-  $instance_usage_audit                        = false,
-  $instance_usage_audit_period                 = 'month',
-  $mkisofs_cmd                                 = $::os_service_default,
-  $use_cow_images                              = $::os_service_default,
-  $force_raw_images                            = $::os_service_default,
-  $virt_mkfs                                   = $::os_service_default,
-  $reserved_host_memory                        = $::os_service_default,
-  $reserved_host_disk                          = $::os_service_default,
-  $heal_instance_info_cache_interval           = $::os_service_default,
-  $config_drive_format                         = $::os_service_default,
-  $update_resources_interval                   = $::os_service_default,
-  $reboot_timeout                              = $::os_service_default,
-  $instance_build_timeout                      = $::os_service_default,
-  $rescue_timeout                              = $::os_service_default,
-  $resize_confirm_window                       = $::os_service_default,
-  $shutdown_timeout                            = $::os_service_default,
-  $cpu_shared_set                              = $::os_service_default,
-  $cpu_dedicated_set                           = $::os_service_default,
-  $resume_guests_state_on_host_boot            = $::os_service_default,
-  $max_concurrent_builds                       = $::os_service_default,
-  $max_concurrent_live_migrations              = $::os_service_default,
-  $sync_power_state_pool_size                  = $::os_service_default,
-  $sync_power_state_interval                   = $::os_service_default,
-  $consecutive_build_service_disable_threshold = $::os_service_default,
-  $reserved_huge_pages                         = $::os_service_default,
-  $neutron_physnets_numa_nodes_mapping         = {},
+  Boolean $force_config_drive                  = false,
+  Boolean $virtio_nic                                  = false,
+  Boolean $instance_usage_audit                = false,
+  $instance_usage_audit_period                 = $facts['os_service_default'],
+  $mkisofs_cmd                                 = $facts['os_service_default'],
+  $use_cow_images                              = $facts['os_service_default'],
+  $force_raw_images                            = $facts['os_service_default'],
+  $virt_mkfs                                   = $facts['os_service_default'],
+  $reserved_host_memory                        = $facts['os_service_default'],
+  $reserved_host_disk                          = $facts['os_service_default'],
+  $heal_instance_info_cache_interval           = $facts['os_service_default'],
+  $config_drive_format                         = $facts['os_service_default'],
+  $update_resources_interval                   = $facts['os_service_default'],
+  $reboot_timeout                              = $facts['os_service_default'],
+  $instance_build_timeout                      = $facts['os_service_default'],
+  $rescue_timeout                              = $facts['os_service_default'],
+  $resize_confirm_window                       = $facts['os_service_default'],
+  $shutdown_timeout                            = $facts['os_service_default'],
+  $cpu_shared_set                              = $facts['os_service_default'],
+  $cpu_dedicated_set                           = $facts['os_service_default'],
+  $resume_guests_state_on_host_boot            = $facts['os_service_default'],
+  $max_concurrent_builds                       = $facts['os_service_default'],
+  $max_concurrent_live_migrations              = $facts['os_service_default'],
+  $sync_power_state_pool_size                  = $facts['os_service_default'],
+  $sync_power_state_interval                   = $facts['os_service_default'],
+  $consecutive_build_service_disable_threshold = $facts['os_service_default'],
+  $reserved_huge_pages                         = $facts['os_service_default'],
+  Hash $neutron_physnets_numa_nodes_mapping    = {},
   $neutron_tunnel_numa_nodes                   = [],
   $live_migration_wait_for_vif_plug            = $::os_service_default,
   $max_disk_devices_to_attach                  = $::os_service_default,
@@ -352,9 +352,9 @@ class nova::compute (
 
   $cpu_shared_set_real = join(any2array($cpu_shared_set), ',')
   $cpu_dedicated_set_real = join(any2array($cpu_dedicated_set), ',')
+  $image_type_exclude_list_real = pick(join(any2array($image_type_exclude_list), ','), $facts['os_service_default'])
 
-  $image_type_exclude_list_real = pick(join(any2array($image_type_exclude_list), ','), $::os_service_default)
-
+  include nova::policy
   include nova::pci
   include nova::compute::pci
   include nova::compute::mdev
@@ -401,7 +401,6 @@ class nova::compute (
   }
 
   if !empty($neutron_physnets_numa_nodes_mapping) {
-    validate_legacy(Hash, 'validate_hash', $neutron_physnets_numa_nodes_mapping)
     $neutron_physnets_real = keys($neutron_physnets_numa_nodes_mapping)
     nova_config {
       'neutron/physnets': value => join(any2array($neutron_physnets_real), ',');

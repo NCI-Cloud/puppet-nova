@@ -62,17 +62,18 @@
 #    Defaults to 0.
 
 class nova::cron::purge_shadow_tables (
-  $minute       = 0,
-  $hour         = 5,
-  $monthday     = '*',
-  $month        = '*',
-  $weekday      = '*',
-  $user         = $::nova::params::user,
-  $destination  = '/var/log/nova/nova-rowspurge.log',
-  $age          = 14,
-  $all_cells    = false,
-  $verbose      = false,
-  $maxdelay     = 0,
+  $minute                           = 0,
+  $hour                             = 5,
+  $monthday                         = '*',
+  $month                            = '*',
+  $weekday                          = '*',
+  $user                             = $::nova::params::user,
+  $destination                      = '/var/log/nova/nova-rowspurge.log',
+  $age                              = 14,
+  Boolean $all_cells                = false,
+  Boolean $verbose                  = false,
+  $maxdelay                         = 0,
+  Enum['present', 'absent'] $ensure = 'present',
 ) inherits nova::params {
 
   include nova::deps
@@ -101,6 +102,7 @@ class nova::cron::purge_shadow_tables (
   $cron_cmd = 'nova-manage db purge'
 
   cron { 'nova-manage db purge':
+    ensure      => $ensure,
     # lint:ignore:140chars
     command     => "${delay_cmd}${cron_cmd} --before `date --date='today - ${age} days' +\\%D`${verbose_real}${all_cells_real} >>${destination} 2>&1",
     # lint:endignore

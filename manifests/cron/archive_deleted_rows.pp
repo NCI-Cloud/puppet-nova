@@ -89,22 +89,23 @@
 #    Defaults to 0.
 #
 class nova::cron::archive_deleted_rows (
-  $minute         = 1,
-  $hour           = 0,
-  $monthday       = '*',
-  $month          = '*',
-  $weekday        = '*',
-  $max_rows       = '100',
-  $user           = $::nova::params::user,
-  $destination    = '/var/log/nova/nova-rowsflush.log',
-  $until_complete = false,
-  $purge          = false,
-  $age            = undef,
-  $all_cells      = false,
-  $task_log       = false,
-  $sleep          = undef,
-  $verbose        = false,
-  $maxdelay       = 0,
+  $minute                           = 1,
+  $hour                             = 0,
+  $monthday                         = '*',
+  $month                            = '*',
+  $weekday                          = '*',
+  $max_rows                         = '100',
+  $user                             = $::nova::params::user,
+  $destination                      = '/var/log/nova/nova-rowsflush.log',
+  Boolean $until_complete           = false,
+  Boolean $purge                    = false,
+  $age                              = undef,
+  Boolean $all_cells                = false,
+  Boolean $task_log                 = false,
+  $sleep                            = undef,
+  Boolean $verbose                  = false,
+  $maxdelay                         = 0,
+  Enum['present', 'absent'] $ensure = 'present',
 ) inherits nova::params {
 
   include nova::deps
@@ -165,6 +166,7 @@ class nova::cron::archive_deleted_rows (
   $cron_cmd = 'nova-manage db archive_deleted_rows'
 
   cron { 'nova-manage db archive_deleted_rows':
+    ensure      => $ensure,
     # lint:ignore:140chars
     command     => "${delay_cmd}${cron_cmd}${purge_real} --max_rows ${max_rows}${verbose_real}${age_real}${until_complete_real}${all_cells_real}${task_log_real}${sleep_real} >>${destination} 2>&1",
     # lint:endignore

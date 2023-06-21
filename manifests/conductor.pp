@@ -28,11 +28,11 @@
 #   Defaults to $::os_service_default
 #
 class nova::conductor(
-  $enabled             = true,
-  $manage_service      = true,
-  $ensure_package      = 'present',
-  $workers             = $::os_workers,
-  $enable_new_services = $::os_service_default,
+  Boolean $enabled        = true,
+  Boolean $manage_service = true,
+  $ensure_package         = 'present',
+  $workers                = $facts['os_workers'],
+  $enable_new_services    = $facts['os_service_default'],
 ) {
 
   include nova::deps

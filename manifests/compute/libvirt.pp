@@ -239,9 +239,9 @@ class nova::compute::libvirt (
   $ensure_package                             = 'present',
   $virt_type                                  = 'kvm',
   $vncserver_listen                           = '127.0.0.1',
-  $migration_support                          = false,
+  Boolean $migration_support                  = false,
   $cpu_mode                                   = false,
-  $cpu_models                                 = [],
+  Array[String[1]] $cpu_models                = [],
   $cpu_model_extra_flags                      = undef,
   $snapshot_image_format                      = $::os_service_default,
   $snapshots_directory                        = $::os_service_default,
@@ -260,26 +260,27 @@ class nova::compute::libvirt (
   $virtlog_service_name                       = $::nova::params::virtlog_service_name,
   $modular_libvirt                            = $::nova::params::modular_libvirt,
   $compute_driver                             = 'libvirt.LibvirtDriver',
-  $preallocate_images                         = $::os_service_default,
-  $manage_libvirt_services                    = true,
-  $rx_queue_size                              = $::os_service_default,
-  $tx_queue_size                              = $::os_service_default,
-  $file_backed_memory                         = undef,
-  $images_type                                = $::os_service_default,
-  $volume_use_multipath                       = $::os_service_default,
-  $nfs_mount_options                          = $::os_service_default,
-  $num_pcie_ports                             = $::os_service_default,
-  $mem_stats_period_seconds                   = $::os_service_default,
-  $pmem_namespaces                            = $::os_service_default,
-  $swtpm_enabled                              = $::os_service_default,
-  $swtpm_user                                 = $::os_service_default,
-  $swtpm_group                                = $::os_service_default,
+  $preallocate_images                         = $facts['os_service_default'],
+  Boolean $manage_libvirt_services            = true,
+  $rx_queue_size                              = $facts['os_service_default'],
+  $tx_queue_size                              = $facts['os_service_default'],
+  $file_backed_memory                         = $facts['os_service_default'],
+  $images_type                                = $facts['os_service_default'],
+  $volume_use_multipath                       = $facts['os_service_default'],
+  $nfs_mount_options                          = $facts['os_service_default'],
+  $num_pcie_ports                             = $facts['os_service_default'],
+  $mem_stats_period_seconds                   = $facts['os_service_default'],
+  $pmem_namespaces                            = $facts['os_service_default'],
+  $swtpm_enabled                              = $facts['os_service_default'],
+  $swtpm_user                                 = $facts['os_service_default'],
+  $swtpm_group                                = $facts['os_service_default'],
   $log_outputs                                = $::os_service_default,
   $log_filters                                = $::os_service_default,
   $tls_priority                               = $::os_service_default,
   $ovs_timeout                                = $::os_service_default,
-  $max_queues                                 = $::os_service_default,
-  $num_memory_encrypted_guests                = $::os_service_default,
+  $max_queues                                 = $facts['os_service_default'],
+  $num_memory_encrypted_guests                = $facts['os_service_default'],
+  $wait_soft_reboot_seconds                   = $facts['os_service_default'],
 ) inherits nova::params {
 
   include nova::deps
@@ -399,7 +400,6 @@ class nova::compute::libvirt (
     'libvirt/num_memory_encrypted_guests': value => $num_memory_encrypted_guests;
   }
 
-  validate_legacy(Array, 'validate_array', $cpu_models)
   # cpu_model param is only valid if cpu_mode=custom
   # otherwise it should be commented out
   if $cpu_mode_default == 'custom' and !empty($cpu_models){

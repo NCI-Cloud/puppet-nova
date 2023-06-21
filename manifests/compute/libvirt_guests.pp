@@ -47,12 +47,12 @@
 #   Defaults to false
 #
 class nova::compute::libvirt_guests (
-  $enabled                           = false,
-  $package_ensure                    = 'present',
-  $shutdown_timeout                  = '300',
-  $on_boot                           = 'ignore',
-  $on_shutdown                       = 'shutdown',
-  $manage_service                    = false,
+  Boolean $enabled        = false,
+  $package_ensure         = 'present',
+  $shutdown_timeout       = '300',
+  $on_boot                = 'ignore',
+  $on_shutdown            = 'shutdown',
+  Boolean $manage_service = false,
 ) {
   include nova::params
   include nova::deps
