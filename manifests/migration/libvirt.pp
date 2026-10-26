@@ -307,12 +307,12 @@ class nova::migration::libvirt(
         exec { "stop ${proxy_service}.service":
           path    => ['/sbin', '/usr/sbin', '/bin', '/usr/bin'],
           command => "systemctl -q stop ${proxy_service}.service",
-          unless  => "systemctl -q is-active ${proxy_service}-${transport_real}.socket",
+          unless  => "systemctl -q is-active ${proxy_service}-${transport}.socket",
           require => Anchor['nova::install::end']
         }
-        -> service { "${proxy_service}-${transport_real}":
+        -> service { "${proxy_service}-${transport}":
           ensure  => 'running',
-          name    => "${proxy_service}-${transport_real}.socket",
+          name    => "${proxy_service}-${transport}.socket",
           enable  => true,
           require => Anchor['nova::config::end']
         }
