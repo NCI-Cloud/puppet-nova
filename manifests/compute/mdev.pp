@@ -27,7 +27,7 @@ class nova::compute::mdev(
       'devices/enabled_mdev_types': value => join(keys($mdev_types), ',')
     }
     create_resources('nova::compute::mdev_type', $mdev_types)
-  elsif !empty($mdev_types_device_addresses_mapping) {
+  } elsif !empty($mdev_types_device_addresses_mapping) {
     nova_config {
       'devices/enabled_mdev_types': value => join(keys($mdev_types_device_addresses_mapping), ',');
     }
