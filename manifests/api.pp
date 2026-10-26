@@ -201,7 +201,7 @@ class nova::api(
   $metadata_listen_port                        = 8775,
   $enabled_apis                                = ['osapi_compute', 'metadata'],
   $use_forwarded_for                           = false,
-  $instance_name_template                      = $::os_service_default,
+  $instance_name_template                      = $facts['os_service_default'],
   $osapi_compute_workers                       = $facts['os_workers'],
   $metadata_workers                            = $facts['os_workers'],
   Boolean $sync_db                             = true,
@@ -209,24 +209,23 @@ class nova::api(
   Boolean $db_online_data_migrations           = false,
   $service_name                                = $::nova::params::api_service_name,
   $metadata_service_name                       = $::nova::params::api_metadata_service_name,
-  $enable_proxy_headers_parsing                = $::os_service_default,
-  $max_request_body_size                       = $::os_service_default,
-  $max_limit                                   = $::os_service_default,
-  $compute_link_prefix                         = $::os_service_default,
-  $glance_link_prefix                          = $::os_service_default,
-  $hide_server_address_states                  = $::os_service_default,
-  $allow_instance_snapshots                    = $::os_service_default,
-  $enable_network_quota                        = $::os_service_default,
-  $enable_instance_password                    = $::os_service_default,
-  $password_length                             = $::os_service_default,
+  $enable_proxy_headers_parsing                = $facts['os_service_default'],
+  $max_request_body_size                       = $facts['os_service_default'],
+  $max_limit                                   = $facts['os_service_default'],
+  $compute_link_prefix                         = $facts['os_service_default'],
+  $glance_link_prefix                          = $facts['os_service_default'],
+  $hide_server_address_states                  = $facts['os_service_default'],
+  $allow_instance_snapshots                    = $facts['os_service_default'],
+  $enable_network_quota                        = $facts['os_service_default'],
+  $enable_instance_password                    = $facts['os_service_default'],
+  $password_length                             = $facts['os_service_default'],
   $allow_resize_to_same_host                   = false,
-  $instance_list_per_project_cells             = $::os_service_default,
-  $instance_list_cells_batch_strategy          = $::os_service_default,
-  $instance_list_cells_batch_fixed_size        = $::os_service_default,
-  $list_records_by_skipping_down_cells         = $::os_service_default,
+  $instance_list_per_project_cells             = $facts['os_service_default'],
+  $instance_list_cells_batch_strategy          = $facts['os_service_default'],
+  $instance_list_cells_batch_fixed_size        = $facts['os_service_default'],
+  $list_records_by_skipping_down_cells         = $facts['os_service_default'],
   # DEPRECATED PARAMETER
   Boolean $nova_metadata_wsgi_enabled          = false,
-  $use_forwarded_for                           = undef,
 ) inherits nova::params {
 
   include nova::deps
@@ -244,7 +243,7 @@ class nova::api(
     $instance_name_template_real = $instance_name_template
   } else {
     warning('Using a false value for instance_name_template is deprecated. Use $::os_service_default instead.')
-    $instance_name_template_real = $::os_service_default
+    $instance_name_template_real = $facts['os_service_default']
   }
   nova_config {
     'DEFAULT/instance_name_template': value => $instance_name_template_real;
