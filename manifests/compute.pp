@@ -300,7 +300,7 @@ class nova::compute (
   $vncproxy_port                               = '6080',
   $vncproxy_path                               = '/vnc_auto.html',
   Boolean $force_config_drive                  = false,
-  Boolean $virtio_nic                                  = false,
+  Boolean $virtio_nic                          = false,
   Boolean $instance_usage_audit                = false,
   $instance_usage_audit_period                 = $facts['os_service_default'],
   $mkisofs_cmd                                 = $facts['os_service_default'],
@@ -328,17 +328,17 @@ class nova::compute (
   $reserved_huge_pages                         = $facts['os_service_default'],
   Hash $neutron_physnets_numa_nodes_mapping    = {},
   $neutron_tunnel_numa_nodes                   = [],
-  $live_migration_wait_for_vif_plug            = $::os_service_default,
-  $max_disk_devices_to_attach                  = $::os_service_default,
-  $default_access_ip_network_name              = $::os_service_default,
-  $running_deleted_instance_action             = $::os_service_default,
-  $running_deleted_instance_poll_interval      = $::os_service_default,
-  $running_deleted_instance_timeout            = $::os_service_default,
-  $compute_monitors                            = $::os_service_default,
-  $default_ephemeral_format                    = $::os_service_default,
-  $image_type_exclude_list                     = $::os_service_default,
-  $block_device_allocate_retries               = $::os_service_default,
-  $block_device_allocate_retries_interval      = $::os_service_default,
+  $live_migration_wait_for_vif_plug            = $facts['os_service_default'],
+  $max_disk_devices_to_attach                  = $facts['os_service_default'],
+  $default_access_ip_network_name              = $facts['os_service_default'],
+  $running_deleted_instance_action             = $facts['os_service_default'],
+  $running_deleted_instance_poll_interval      = $facts['os_service_default'],
+  $running_deleted_instance_timeout            = $facts['os_service_default'],
+  $compute_monitors                            = $facts['os_service_default'],
+  $default_ephemeral_format                    = $facts['os_service_default'],
+  $image_type_exclude_list                     = $facts['os_service_default'],
+  $block_device_allocate_retries               = $facts['os_service_default'],
+  $block_device_allocate_retries_interval      = $facts['os_service_default'],
   # DEPRECATED PARAMETERS
   $vcpu_pin_set                                = undef,
   $keymgr_backend                              = undef,
@@ -394,8 +394,8 @@ class nova::compute (
     # 4. if cpu_shared_set is set but vcpu_pin_set and cpu_dedicated_set are not set.
     # 5. if cpu_shared_set and cpu_dedicated_set both are set, then ignore vcpu_pin_set.
     nova_config {
-      'compute/cpu_shared_set':    value  => $cpu_shared_set_real;
-      'compute/cpu_dedicated_set': value  => $cpu_dedicated_set_real;
+      'compute/cpu_shared_set':    value => $cpu_shared_set_real;
+      'compute/cpu_dedicated_set': value => $cpu_dedicated_set_real;
       'DEFAULT/vcpu_pin_set':      ensure => absent; # when undef, don't include in conf.
     }
   }
@@ -496,7 +496,7 @@ class nova::compute (
   }
 
   ['barbican_auth_endpoint', 'barbican_endpoint', 'barbican_api_version'].each |String $barbican_opt| {
-    if getvar("${barbican_opt}") != undef {
+    if getvar($barbican_opt) != undef {
       warning("The ${barbican_opt} parameter is deprecated. Use the nova::key_manager::barbican class")
     }
     include nova::key_manager::barbican
