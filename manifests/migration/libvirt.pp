@@ -251,16 +251,22 @@ class nova::migration::libvirt(
       $auth_tcp_real = $facts['os_service_default']
       $ca_file_real  = $ca_file
       $crl_file_real = $crl_file
+      $listen_tls = '1'
+      $listen_tcp = '0'
     } elsif $transport == 'tcp' {
       $auth_tls_real = $facts['os_service_default']
       $auth_tcp_real = $auth
       $ca_file_real  = $::os_service_default
       $crl_file_real = $::os_service_default
+      $listen_tls = '0'
+      $listen_tcp = '1'
     } else {
       $auth_tls_real = $::os_service_default
       $auth_tcp_real = $::os_service_default
       $ca_file_real  = $::os_service_default
       $crl_file_real = $::os_service_default
+      $listen_tls = '0'
+      $listen_tcp = '0'
     }
 
     if $listen_address == undef {
